@@ -5,9 +5,6 @@ import '../../../../core/services/dio_client.dart';
 import '../../../../core/services/secure_storage.dart';
 import '../../../../core/constants/api_constants.dart';
 
-/// ─────────────────────────────────────────────────
-/// Auth Status Enum
-/// ─────────────────────────────────────────────────
 enum AuthStatus {
   initial,
   loading,
@@ -21,7 +18,7 @@ class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  /// ─── State ─────────────────────────────────────
+  // ─── State ─────────────────────────────────────
   AuthStatus _status = AuthStatus.initial;
   User? _firebaseUser;
   String? _backendToken;
@@ -30,10 +27,45 @@ class AuthProvider extends ChangeNotifier {
   String? _tempEmail;
   String? _tempPassword;
 
-  /// ─── Getters ───────────────────────────────────
+  // ─── Getters ───────────────────────────────────
   AuthStatus get status => _status;
   User? get firebaseUser => _firebaseUser;
   String? get backendToken => _backendToken;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _status == AuthStatus.loading;
+
+  // Register
+  Future<bool> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    _setLoading();
+    try {
+      final credential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      _firebaseUser = credential.user;
+
+      await _firebaseUser?.updateDisplayName(name);
+      await _firebaseUser?.sendEmailVerification();
+
+      _tempEmail = email;
+      _tempPassword = password;
+
+      _status = AuthStatus.emailNotVerified;
+      notifyListeners();
+
+      return true;
+    } on FirebaseAuthException catch (e) {
+      _setError(_mapFirebaseError(e.code));
+      return false;
+    }
+  }
+
+  
+
 }
