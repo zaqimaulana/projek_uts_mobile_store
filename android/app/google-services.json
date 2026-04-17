@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "497918096590",
+    "project_id": "latihan-firebase-9ddb1",
+    "storage_bucket": "latihan-firebase-9ddb1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497918096590:android:f2aefa1dcab252d05c4c9f",
+        "android_client_info": {
+          "package_name": "com.example.beer_store_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3vK6ZJr9Kd9LB76A_AE4YM93VaK40Ryc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497918096590:android:88ae6ed65af58b0f5c4c9f",
+        "android_client_info": {
+          "package_name": "com.zaqi.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3vK6ZJr9Kd9LB76A_AE4YM93VaK40Ryc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
