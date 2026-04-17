@@ -175,4 +175,20 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
   }
+  
+  //Resend email verifikasi
+  Future<void> resendVerificationEmail() async {
+    await _firebaseUser?.sendEmailVerification();
+  }
+
+  Future<bool> checkEmailVerified() async {
+    await _firebaseUser?.reload();
+    _firebaseUser = _auth.currentUser;
+
+    if (_firebaseUser?.emailVerified ?? false) {
+      return await _verifyTokenToBackend();
+    }
+
+    return false;
+  }
 }
