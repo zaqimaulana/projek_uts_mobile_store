@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:email_validator/email_validator.dart';
-
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/auth_header.dart';
 import '../../../../core/widgets/loading_overlay.dart';
-
 import '../providers/auth_provider.dart';
 import '../../../../core/router/app_router.dart';
 
