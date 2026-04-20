@@ -6,7 +6,7 @@ import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/auth_header.dart';
 import '../../../../core/widgets/loading_overlay.dart';
 import '../providers/auth_provider.dart';
-import '../../../../core/router/app_router.dart';
+import '../../../../core/routes/app_router.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
