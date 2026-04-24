@@ -16,7 +16,10 @@ enum AuthStatus {
 
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: "497918096590-1nok3qn97fvjj2ga4227rhc0q1vlpctu.apps.googleusercontent.com",
+    scopes: ['email'],
+  );
 
   // ─── State ─────────────────────────────────────
   AuthStatus _status = AuthStatus.initial;
@@ -165,36 +168,42 @@ Future<bool> loginWithEmail({
   //Login dengan Google
   Future<bool> loginWithGoogle() async {
     _setLoading();
+
     try {
-      final googleUser =
-          await _googleSignIn.signIn();
+      /// STEP 1: pilih akun google
+      final googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         _setError('Login Google dibatalkan');
         return false;
       }
 
-      final googleAuth =
-          await googleUser.authentication;
+      /// STEP 2: ambil auth data
+      final googleAuth = await googleUser.authentication;
 
-      final credential =
-          GoogleAuthProvider.credential(
+      /// STEP 3: convert ke firebase credential
+      final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final userCred =
-          await _auth.signInWithCredential(
-              credential);
+      /// STEP 4: login ke firebase
+      final userCredential =
+          await _auth.signInWithCredential(credential);
 
-      _firebaseUser = userCred.user;
+      _firebaseUser = userCredential.user;
 
+      /// STEP 5: kirim ke backend
       return await _verifyTokenToBackend();
+
     } catch (e) {
+      print("GOOGLE LOGIN ERROR: $e");
       _setError('Gagal login dengan Google');
       return false;
     }
   }
+
+  
   
   //Resend email verifikasi
   Future<void> resendVerificationEmail() async {

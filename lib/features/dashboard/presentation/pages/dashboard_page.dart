@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:beer_store_app/features/products/presentation/providers/product_provider.dart';
 import 'package:beer_store_app/features/products/data/models/product_model.dart';
+import 'package:beer_store_app/features/products/presentation/pages/product_detail_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -11,6 +12,8 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  String _query = '';
+
   @override
   void initState() {
     super.initState();
@@ -21,7 +24,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final product = context.watch<ProductProvider>();
+    final productProvider = context.watch<ProductProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
@@ -31,7 +34,7 @@ class _DashboardPageState extends State<DashboardPage> {
         centerTitle: true,
       ),
 
-      body: switch (product.status) {
+      body: switch (productProvider.status) {
         ProductStatus.loading || ProductStatus.initial =>
           const Center(child: CircularProgressIndicator()),
 
@@ -39,10 +42,10 @@ class _DashboardPageState extends State<DashboardPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(product.error ?? 'Error'),
+              Text(productProvider.error ?? 'Error'),
               const SizedBox(height: 12),
               ElevatedButton(
-                onPressed: () => product.fetchProducts(),
+                onPressed: () => productProvider.fetchProducts(),
                 child: const Text('Coba Lagi'),
               ),
             ],
@@ -50,27 +53,51 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
 
         ProductStatus.loaded => RefreshIndicator(
-          onRefresh: () => product.fetchProducts(),
+          onRefresh: () => productProvider.fetchProducts(),
           child: Column(
             children: [
 
-              /// HEADER
-              const _HeaderSection(),
+              /// HEADER + SEARCH
+              _HeaderSection(
+                onSearch: (value) {
+                  setState(() {
+                    _query = value.toLowerCase();
+                  });
+                },
+              ),
 
-              /// GRID PRODUCT
+              /// FILTER DATA
               Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: product.products.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: .72,
-                  ),
-                  itemBuilder: (_, i) =>
-                      _ProductCard(product: product.products[i]),
+                child: Builder(
+                  builder: (_) {
+                    final filteredProducts =
+                        productProvider.products.where((p) {
+                      return p.name
+                          .toLowerCase()
+                          .contains(_query);
+                    }).toList();
+
+                    if (filteredProducts.isEmpty) {
+                      return const Center(
+                        child: Text("Produk tidak ditemukan"),
+                      );
+                    }
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filteredProducts.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: .72,
+                      ),
+                      itemBuilder: (_, i) => _ProductCard(
+                        product: filteredProducts[i],
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -82,7 +109,9 @@ class _DashboardPageState extends State<DashboardPage> {
 }
 
 class _HeaderSection extends StatelessWidget {
-  const _HeaderSection();
+  final Function(String) onSearch;
+
+  const _HeaderSection({required this.onSearch});
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +136,7 @@ class _HeaderSection extends StatelessWidget {
 
           /// SEARCH
           TextField(
+            onChanged: onSearch,
             decoration: InputDecoration(
               hintText: "Cari beer favorit...",
               prefixIcon: const Icon(Icons.search),
@@ -132,7 +162,14 @@ class _ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductDetailPage(product: product),
+          ),
+        );
+      },
       child: Card(
         elevation: 3,
         shape: RoundedRectangleBorder(

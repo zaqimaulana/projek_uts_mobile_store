@@ -34,6 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /// ================= EMAIL LOGIN =================
   Future<void> _loginEmail() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -48,6 +49,7 @@ class _LoginPageState extends State<LoginPage> {
     _handleLoginResult(ok, authProvider);
   }
 
+  /// ================= GOOGLE LOGIN =================
   Future<void> _loginGoogle() async {
     final authProvider = context.read<auth.AuthProvider>();
 
@@ -57,14 +59,14 @@ class _LoginPageState extends State<LoginPage> {
     _handleLoginResult(ok, authProvider);
   }
 
+  /// ================= HANDLE RESULT =================
   void _handleLoginResult(bool ok, auth.AuthProvider authProvider) {
     if (ok) {
       Navigator.pushReplacementNamed(
         context,
         AppRouter.dashboard,
       );
-    } else if (authProvider.status ==
-        auth.AuthStatus.emailNotVerified) {
+    } else if (authProvider.status == auth.AuthStatus.emailNotVerified) {
       Navigator.pushReplacementNamed(
         context,
         AppRouter.verifyEmail,
@@ -72,14 +74,14 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(authProvider.errorMessage ?? 'Login gagal'),
+          content: Text(authProvider.errorMessage ?? 'Login gagal'),
           backgroundColor: Colors.red,
         ),
       );
     }
   }
 
+  /// ================= FORGOT PASSWORD =================
   void _showForgotPasswordDialog(BuildContext context) {
     final ctrl = TextEditingController();
 
@@ -100,13 +102,17 @@ class _LoginPageState extends State<LoginPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              await FirebaseAuth.instance
-                  .sendPasswordResetEmail(
+              await FirebaseAuth.instance.sendPasswordResetEmail(
                 email: ctrl.text.trim(),
               );
 
               if (context.mounted) {
                 Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Link reset password dikirim'),
+                  ),
+                );
               }
             },
             child: const Text('Kirim'),
@@ -118,8 +124,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading =
-        context.watch<auth.AuthProvider>().isLoading;
+    final isLoading = context.watch<auth.AuthProvider>().isLoading;
 
     return LoadingOverlay(
       isLoading: isLoading,
@@ -137,20 +142,18 @@ class _LoginPageState extends State<LoginPage> {
                   const AuthHeader(
                     icon: Icons.lock_open_outlined,
                     title: 'Selamat Datang',
-                    subtitle:
-                        'Masuk ke akun Anda untuk melanjutkan',
+                    subtitle: 'Masuk ke akun Anda untuk melanjutkan',
                   ),
 
                   const SizedBox(height: 32),
 
+                  /// EMAIL
                   CustomTextField(
                     label: 'Email',
                     hint: 'contoh@email.com',
                     controller: _emailCtrl,
-                    keyboardType:
-                        TextInputType.emailAddress,
-                    prefixIcon:
-                        const Icon(Icons.email_outlined),
+                    keyboardType: TextInputType.emailAddress,
+                    prefixIcon: const Icon(Icons.email_outlined),
                     validator: (v) {
                       if (v?.isEmpty ?? true) {
                         return 'Email wajib diisi';
@@ -164,21 +167,21 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 16),
 
+                  /// PASSWORD
                   CustomTextField(
                     label: 'Password',
                     hint: 'Masukkan password',
                     controller: _passCtrl,
                     obscureText: !_showPass,
-                    prefixIcon:
-                        const Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _showPass
                             ? Icons.visibility_off
                             : Icons.visibility,
                       ),
-                      onPressed: () => setState(
-                          () => _showPass = !_showPass),
+                      onPressed: () =>
+                          setState(() => _showPass = !_showPass),
                     ),
                     validator: (v) =>
                         (v?.isEmpty ?? true)
@@ -188,19 +191,19 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 8),
 
+                  /// FORGOT PASSWORD
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () =>
-                          _showForgotPasswordDialog(
-                              context),
-                      child:
-                          const Text('Lupa Password?'),
+                          _showForgotPasswordDialog(context),
+                      child: const Text('Lupa Password?'),
                     ),
                   ),
 
                   const SizedBox(height: 8),
 
+                  /// LOGIN BUTTON
                   CustomButton(
                     label: 'Masuk',
                     onPressed: _loginEmail,
@@ -209,11 +212,11 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 20),
 
-                  const DividerWithText(
-                      text: 'atau masuk dengan'),
+                  const DividerWithText(text: 'atau masuk dengan'),
 
                   const SizedBox(height: 20),
 
+                  /// GOOGLE BUTTON
                   GoogleSignInButton(
                     onPressed: _loginGoogle,
                     isLoading: isLoading,
@@ -221,9 +224,9 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 24),
 
+                  /// REGISTER
                   Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text('Belum punya akun? '),
                       GestureDetector(
@@ -236,8 +239,7 @@ class _LoginPageState extends State<LoginPage> {
                           'Daftar',
                           style: TextStyle(
                             color: Color(0xFF1565C0),
-                            fontWeight:
-                                FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

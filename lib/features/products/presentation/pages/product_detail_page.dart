@@ -15,29 +15,32 @@ class ProductDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Detail Product"),
       ),
-      body: Column(
-        children: [
 
-          /// IMAGE
-          AspectRatio(
-            aspectRatio: 1,
-            child: Image.network(
-              product.imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.grey.shade200,
-                child: const Icon(
-                  Icons.local_bar,
-                  size: 80,
+      /// 🔥 BODY SCROLLABLE (FIX OVERFLOW)
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+
+            /// IMAGE
+            AspectRatio(
+              aspectRatio: 1,
+              child: Image.network(
+                product.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (_, __, ___) => Container(
+                  color: Colors.grey.shade200,
+                  child: const Icon(
+                    Icons.local_bar,
+                    size: 80,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          /// CONTENT
-          Expanded(
-            child: Container(
+            /// CONTENT
+            Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +86,7 @@ class ProductDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  /// DESCRIPTION
+                  /// DESCRIPTION TITLE
                   const Text(
                     "Description",
                     style: TextStyle(
@@ -93,19 +96,27 @@ class ProductDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
+                  /// DESCRIPTION TEXT
                   Text(
                     product.description.isEmpty
                         ? "No description"
                         : product.description,
+                    style: const TextStyle(height: 1.5),
                   ),
 
-                  const Spacer(),
+                  const SizedBox(height: 24),
 
-                  /// ADD TO CART BUTTON
+                  /// BUTTON
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Added to cart"),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.shopping_cart),
                       label: const Text("Add to Cart"),
                       style: ElevatedButton.styleFrom(
@@ -116,8 +127,8 @@ class ProductDetailPage extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
