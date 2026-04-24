@@ -1,16 +1,45 @@
-# beer_store_app
+# 📱 Toko Minum-Minuman (Flutter + Firebase + Golang Backend)
 
-A new Flutter project.
+## 👤 Identitas Mahasiswa
 
-## Getting Started
+- Nama: ZAQIMAULANA
+- NIM: 1123150148
+- Kelas: TI 23 SH SE
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## LINK YouTube
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- 
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 📌 Deskripsi Aplikasi
+
+AppsMarketplace adalah aplikasi mobile berbasis Flutter yang digunakan sebagai platform Toko Minuman sederhana. Aplikasi ini memiliki fitur:
+
+- 🔐 Login & Register (Email & Google Sign-In)
+- 📧 Email Verification (Firebase Auth)
+- 🛒 Manajemen Produk (List produk dari backend)
+- 🛍️ Keranjang belanja (Cart system)
+- 🔄 Integrasi backend menggunakan Golang (REST API)
+- 🔐 Token authentication (Firebase → Backend)
+
+Aplikasi ini menggunakan:
+
+- Flutter (Frontend Mobile)
+- Firebase Authentication
+- Golang (Backend API)
+- Dio (HTTP Client)
+- Provider (State Management)
+
+---
+
+## 🚀 Cara Menjalankan Aplikasi
+
+### 1. Clone Project
+
+```bash
+git clone https://github.com/username/appsmarketplace.git
+cd appsmarketplace
+```
