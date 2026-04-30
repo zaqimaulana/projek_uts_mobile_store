@@ -1,4 +1,4 @@
-# 📱 Toko Minum-Minuman (Flutter + Firebase + Golang Backend)
+# 📱 Toko Minum Mahal (Flutter + Firebase + Golang Backend)
 
 ## 👤 Identitas Mahasiswa
 
@@ -10,13 +10,13 @@
 
 ## LINK YouTube
 
-- 
+- https://youtu.be/31rGS27Qfkw
 
 ---
 
 ## 📌 Deskripsi Aplikasi
 
-AppsMarketplace adalah aplikasi mobile berbasis Flutter yang digunakan sebagai platform Toko Minuman sederhana. Aplikasi ini memiliki fitur:
+BeerAppsStore adalah aplikasi mobile berbasis Flutter yang digunakan sebagai platform Toko Minuman keras sederhana. Aplikasi ini memiliki fitur:
 
 - 🔐 Login & Register (Email & Google Sign-In)
 - 📧 Email Verification (Firebase Auth)
