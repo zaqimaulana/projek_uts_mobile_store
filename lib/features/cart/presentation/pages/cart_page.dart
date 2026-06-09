@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:beer_store_app/core/routes/app_router.dart';
 import 'package:beer_store_app/features/cart/presentation/providers/cart_provider.dart';
 
 class CartPage extends StatelessWidget {
@@ -91,7 +92,9 @@ class CartPage extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, AppRouter.checkout);
+                          },
                           child: const Text("Checkout"),
                         ),
                       ),

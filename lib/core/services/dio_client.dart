@@ -36,10 +36,16 @@ class DioClient {
           handler.next(response);
         },
         onError: (error, handler) async {
-          debugPrint('[ERROR] ${error.response?.statusCode}');
+          debugPrint('[ERROR TYPE] ${error.type}');
+          debugPrint('[ERROR MESSAGE] ${error.message}');
+          debugPrint('[ERROR URL] ${error.requestOptions.uri}');
+          debugPrint('[ERROR STATUS] ${error.response?.statusCode}');
+          debugPrint('[ERROR DATA] ${error.response?.data}');
+
           if (error.response?.statusCode == 401) {
             await SecureStorageService.clearAll();
           }
+
           handler.next(error);
         },
       ),

@@ -6,6 +6,7 @@ import 'package:beer_store_app/core/theme/app_theme.dart';
 import 'package:beer_store_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:beer_store_app/features/products/presentation/providers/product_provider.dart';
 import 'package:beer_store_app/features/cart/presentation/providers/cart_provider.dart';
+import 'package:beer_store_app/core/theme/theme_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -25,13 +26,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
-        title:                     'My App',
-        debugShowCheckedModeBanner: false,
-        theme:                     AppTheme.light,
-        initialRoute:              AppRouter.splash,
-        routes:                    AppRouter.routes,
+      child: Consumer<ThemeProvider>(
+        builder: (_, themeProvider, __) => MaterialApp(
+          title:                     'My App',
+          debugShowCheckedModeBanner: false,
+          theme:                     AppTheme.light,
+          darkTheme:                 AppTheme.dark,
+          themeMode:                 themeProvider.mode,
+          initialRoute:              AppRouter.splash,
+          routes:                    AppRouter.routes,
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:beer_store_app/features/products/presentation/pages/product_deta
 import 'package:beer_store_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:beer_store_app/features/cart/presentation/providers/cart_provider.dart';
 import 'package:beer_store_app/features/cart/presentation/pages/cart_page.dart';
+import 'package:beer_store_app/core/theme/theme_provider.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -50,13 +51,21 @@ class _DashboardPageState extends State<DashboardPage> {
     final cart = context.watch<CartProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xffF5F6FA),
       appBar: AppBar(
         elevation: 0,
         title: const Text("Beer Store"),
         centerTitle: true,
 
         actions: [
+          /// DARK MODE TOGGLE
+          IconButton(
+            icon: Icon(
+              context.watch<ThemeProvider>().isDark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () => context.read<ThemeProvider>().toggle(),
+          ),
 
           /// CART BUTTON
           Stack(
