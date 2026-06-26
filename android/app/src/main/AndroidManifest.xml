@@ -32,13 +32,6 @@
                 <data android:scheme="beerstore" android:host="payment-result"/>
             </intent-filter>
         </activity>
-        <!-- Izinkan memanggil app Dompet Kampus -->
-        <queries>
-            <intent>
-                <action android:name="android.intent.action.VIEW"/>
-                <data android:scheme="dompetkampus"/>
-            </intent>
-        </queries>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -50,6 +43,13 @@
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <!-- Izinkan memanggil app Dompet Kampus -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="dompetkampus"/>
+        </intent>
+    </queries>
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
