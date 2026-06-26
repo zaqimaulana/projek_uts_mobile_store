@@ -8,12 +8,14 @@ import 'package:beer_store_app/features/products/presentation/providers/product_
 import 'package:beer_store_app/features/cart/presentation/providers/cart_provider.dart';
 import 'package:beer_store_app/core/theme/theme_provider.dart';
 import 'package:beer_store_app/core/services/payment_callback_provider.dart';
+import 'package:beer_store_app/core/services/fcm_service.dart';
 import 'package:beer_store_app/features/checkout/presentation/providers/checkout_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FcmService.instance.init();
 
   runApp(const MyApp());
 }
