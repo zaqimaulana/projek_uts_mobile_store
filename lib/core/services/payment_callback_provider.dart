@@ -49,6 +49,20 @@ class PaymentCallbackProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void simulate({
+    required PaymentCallbackStatus status,
+    String? reference,
+    String? transactionId,
+  }) {
+    _result = PaymentCallbackResult(
+      status: status,
+      reference: reference,
+      transactionId: transactionId ??
+          'SIM_${DateTime.now().millisecondsSinceEpoch}',
+    );
+    notifyListeners();
+  }
+
   void reset() {
     _result = const PaymentCallbackResult(status: PaymentCallbackStatus.none);
     notifyListeners();
