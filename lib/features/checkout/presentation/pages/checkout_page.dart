@@ -1,150 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:beer_store_app/core/services/payment_callback_provider.dart';
-import 'package:beer_store_app/core/services/payment_deeplink_service.dart';
 import 'package:beer_store_app/features/cart/presentation/providers/cart_provider.dart';
-import 'package:beer_store_app/features/checkout/presentation/providers/checkout_provider.dart';
-import 'payment_result_page.dart';
+import 'payment_pending_page.dart';
 
-class CheckoutPage extends StatefulWidget {
+class CheckoutPage extends StatelessWidget {
   const CheckoutPage({super.key});
 
-  @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
-}
-
-class _CheckoutPageState extends State<CheckoutPage> {
-  bool _openingPayment = false;
-  bool _navigating = false;
-  String? _pendingReference;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PaymentCallbackProvider>().addListener(_onPaymentCallback);
-    });
-  }
-
-  @override
-  void dispose() {
-    context.read<PaymentCallbackProvider>().removeListener(_onPaymentCallback);
-    super.dispose();
-  }
-
-  void _onPaymentCallback() {
-    if (_navigating) return;
-    final result = context.read<PaymentCallbackProvider>().result;
-    if (result.status == PaymentCallbackStatus.none) return;
-
-    _navigating = true;
-
-    if (result.status == PaymentCallbackStatus.success) {
-      _submitOrderThenNavigate(result.reference ?? _pendingReference ?? '');
-    } else {
-      _goToResultPage();
+  String _formatPrice(double price) {
+    final str = price.toInt().toString();
+    final buffer = StringBuffer();
+    int count = 0;
+    for (int i = str.length - 1; i >= 0; i--) {
+      if (count > 0 && count % 3 == 0) buffer.write('.');
+      buffer.write(str[i]);
+      count++;
     }
+    return 'Rp ${buffer.toString().split('').reversed.join()}';
   }
 
-  Future<void> _submitOrderThenNavigate(String reference) async {
-    final cart = context.read<CartProvider>();
-    final checkout = context.read<CheckoutProvider>();
-
-    await checkout.submitOrder(cart: cart, paymentReference: reference);
-
-    if (!mounted) return;
-
-    if (checkout.status == CheckoutStatus.success) {
-      cart.clearCart();
-    }
-
-    _goToResultPage();
-  }
-
-  void _showSimulasiDialog(String reference) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text('Dompet Kampus Tidak Tersedia'),
-        content: const Text(
-          'Aplikasi Dompet Kampus tidak terinstall.\nPilih simulasi hasil pembayaran:',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<PaymentCallbackProvider>().simulate(
-                    status: PaymentCallbackStatus.cancelled,
-                    reference: reference,
-                  );
-            },
-            child: const Text('Batalkan'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<PaymentCallbackProvider>().simulate(
-                    status: PaymentCallbackStatus.failed,
-                    reference: reference,
-                  );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Gagal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<PaymentCallbackProvider>().simulate(
-                    status: PaymentCallbackStatus.success,
-                    reference: reference,
-                  );
-            },
-            child: const Text('Berhasil'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _goToResultPage() {
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const PaymentResultPage()),
-    );
-  }
-
-  Future<void> _bayar() async {
+  void _bayar(BuildContext context) {
     final cart = context.read<CartProvider>();
     if (cart.items.isEmpty) return;
 
-    setState(() => _openingPayment = true);
+    final reference = 'BEER_${DateTime.now().millisecondsSinceEpoch}';
 
-    final reference = PaymentDeeplinkService.generateReference();
-    _pendingReference = reference;
-
-    final berhasil = await PaymentDeeplinkService.pay(
-      amount: cart.totalPrice,
-      reference: reference,
-      description: 'Pembelian di Beer Store (${cart.totalItems} item)',
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PaymentPendingPage(
+          reference: reference,
+          amount: cart.totalPrice,
+          description: 'Pembelian di Beer Store (${cart.totalItems} item)',
+        ),
+      ),
     );
-
-    if (!mounted) return;
-    setState(() => _openingPayment = false);
-
-    if (!berhasil) {
-      _showSimulasiDialog(reference);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
-    final checkout = context.watch<CheckoutProvider>();
-
-    final isSubmitting = checkout.status == CheckoutStatus.submitting;
-    final isLoading = _openingPayment || isSubmitting;
+    final primary = Theme.of(context).colorScheme.primary;
+    final surface = Theme.of(context).colorScheme.surface;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),
@@ -154,6 +51,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                // ── Ringkasan Pesanan ─────────────────────────────
                 Text(
                   'Ringkasan Pesanan',
                   style: Theme.of(context)
@@ -162,70 +60,171 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                ...cart.items.map((item) => Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            item.product.imageUrl,
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
-                                const Icon(Icons.local_bar, size: 40),
+                Container(
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      ...cart.items.map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  item.product.imageUrl,
+                                  width: 48,
+                                  height: 48,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.local_bar, size: 40),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.product.name,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    Text(
+                                      '${item.qty}x  ×  ${_formatPrice(item.product.price)}',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: onSurface.withValues(
+                                              alpha: 0.5)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                _formatPrice(item.total),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
                           ),
                         ),
-                        title: Text(
-                          item.product.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          '${item.qty}x  ×  Rp ${item.product.price.toStringAsFixed(0)}',
-                        ),
-                        trailing: Text(
-                          'Rp ${item.total.toStringAsFixed(0)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const Divider(height: 1),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Total',
+                                style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold)),
+                            Text(
+                              _formatPrice(cart.totalPrice),
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: primary),
+                            ),
+                          ],
                         ),
                       ),
-                    )),
-                const Divider(height: 24),
-                const Text(
-                  'Metode Pembayaran',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).colorScheme.primary),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.account_balance_wallet),
-                      SizedBox(width: 12),
-                      Text('Dompet Kampus'),
                     ],
                   ),
                 ),
-                if (checkout.status == CheckoutStatus.error) ...[
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'Gagal membuat order: ${checkout.errorMessage}',
-                      style: const TextStyle(color: Colors.red, fontSize: 12),
-                    ),
+
+                const SizedBox(height: 24),
+
+                // ── Metode Pembayaran ─────────────────────────────
+                Text(
+                  'Metode Pembayaran',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: primary, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A237E).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.school_rounded,
+                            color: Color(0xFF1A237E), size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Global Institute Pay',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600)),
+                            Text('Bayar via Dompet Kampus Global',
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.grey)),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: primary, width: 2),
+                        ),
+                        child: Center(
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
+
+          // ── Tombol Bayar ──────────────────────────────────────
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -238,47 +237,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ],
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total (${cart.totalItems} item)',
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    Text(
-                      'Rp ${cart.totalPrice.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: isLoading ? null : _bayar,
-                    icon: isLoading
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.account_balance_wallet),
-                    label: Text(
-                      isSubmitting
-                          ? 'Menyimpan pesanan...'
-                          : _openingPayment
-                              ? 'Membuka Dompet Kampus...'
-                              : 'Bayar dengan Dompet Kampus',
-                    ),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: cart.items.isEmpty ? null : () => _bayar(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1A237E),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-              ],
+                icon: const Icon(Icons.school_rounded),
+                label: Text(
+                  'Bayar ${_formatPrice(cart.totalPrice)} via Dompet Kampus',
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
           ),
         ],
