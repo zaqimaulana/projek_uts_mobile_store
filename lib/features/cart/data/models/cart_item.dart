@@ -10,4 +10,14 @@ class CartItem {
   });
 
   double get total => product.price * qty;
+
+  Map<String, dynamic> toJson() => {
+        'product': product.toJson(),
+        'qty': qty,
+      };
+
+  factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
+        product: ProductModel.fromJson(json['product'] as Map<String, dynamic>),
+        qty: json['qty'] as int? ?? 1,
+      );
 }

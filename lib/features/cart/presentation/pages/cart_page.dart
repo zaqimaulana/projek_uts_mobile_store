@@ -54,10 +54,18 @@ class CartPage extends StatelessWidget {
 
                             IconButton(
                               icon: const Icon(Icons.add),
-                              onPressed: () =>
-                                  cart.increaseQty(
-                                item.product.id,
-                              ),
+                              onPressed: () {
+                                final ok = cart.increaseQty(item.product.id);
+                                if (!ok) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Stok tidak mencukupi'),
+                                      backgroundColor: Colors.orange,
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           ],
                         ),
