@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:beer_store_app/core/routes/app_router.dart';
-import 'package:beer_store_app/core/services/payment_callback_provider.dart';
 
+/// Halaman hasil pembayaran.
+/// Route arguments (String): 'success' | 'failed' | 'cancelled'
 class PaymentResultPage extends StatelessWidget {
   const PaymentResultPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final result = context.watch<PaymentCallbackProvider>().result;
+    final status =
+        ModalRoute.of(context)?.settings.arguments as String? ?? 'failed';
 
-    final isSuccess = result.status == PaymentCallbackStatus.success;
-    final isCancelled = result.status == PaymentCallbackStatus.cancelled;
+    final isSuccess = status == 'success';
+    final isCancelled = status == 'cancelled';
 
     return Scaffold(
       body: SafeArea(
@@ -37,7 +38,7 @@ class PaymentResultPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 Text(
                   isSuccess
-                      ? 'Pembayaran Berhasil!'
+                      ? 'Pesanan Berhasil!'
                       : isCancelled
                           ? 'Pembayaran Dibatalkan'
                           : 'Pembayaran Gagal',
@@ -45,40 +46,28 @@ class PaymentResultPage extends StatelessWidget {
                       fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                if (result.transactionId != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    'ID Transaksi: ${result.transactionId}',
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-                if (result.reference != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    'Ref: ${result.reference}',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
-                if (!isSuccess && result.error != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    result.error!,
-                    style: const TextStyle(fontSize: 14, color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                const SizedBox(height: 12),
+                Text(
+                  isSuccess
+                      ? 'Terima kasih, pesanan kamu sedang diproses.'
+                      : isCancelled
+                          ? 'Kamu membatalkan pembayaran.'
+                          : 'Terjadi masalah saat memproses pembayaran.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 14,
+                      color:
+                          Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
+                ),
                 const SizedBox(height: 40),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      context.read<PaymentCallbackProvider>().reset();
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        AppRouter.dashboard,
-                        (route) => false,
-                      );
-                    },
+                    onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      AppRouter.dashboard,
+                      (route) => false,
+                    ),
                     child: const Text('Kembali ke Beranda'),
                   ),
                 ),
