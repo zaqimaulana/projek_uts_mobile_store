@@ -11,6 +11,8 @@ class FcmService {
   FcmService._();
   static final FcmService instance = FcmService._();
 
+  static Function(RemoteMessage)? onForeground;
+
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
   Future<void> init() async {
@@ -39,7 +41,7 @@ class FcmService {
     final notif = message.notification;
     if (notif == null) return;
     debugPrint('[FCM] Foreground: ${notif.title} — ${notif.body}');
-    // Notifikasi foreground ditangani di sini (bisa pakai overlay/snackbar)
+    onForeground?.call(message);
   }
 
   void _onMessageOpenedApp(RemoteMessage message) {
