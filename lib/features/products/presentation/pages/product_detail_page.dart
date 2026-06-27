@@ -79,11 +79,28 @@ class ProductDetailPage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   /// STOCK
-                  Text(
-                    "Stock : ${product.stock}",
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
+                  Row(
+                    children: [
+                      Icon(
+                        product.stock > 0
+                            ? Icons.check_circle_outline
+                            : Icons.remove_circle_outline,
+                        size: 16,
+                        color: product.stock > 0 ? Colors.green : Colors.red,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        product.stock > 0
+                            ? 'Stok: ${product.stock}'
+                            : 'Stok habis',
+                        style: TextStyle(
+                          color: product.stock > 0 ? Colors.grey : Colors.red,
+                          fontWeight: product.stock == 0
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 16),
@@ -112,17 +129,24 @@ class ProductDetailPage extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                        onPressed: () {
-                          context.read<CartProvider>().addToCart(product);
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Produk ditambahkan ke cart"),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.shopping_cart),
-                        label: const Text("Add to Cart"),
+                      onPressed: product.stock == 0
+                          ? null
+                          : () {
+                              final added =
+                                  context.read<CartProvider>().addToCart(product);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(added
+                                      ? 'Produk ditambahkan ke cart'
+                                      : 'Stok tidak mencukupi'),
+                                  backgroundColor:
+                                      added ? null : Colors.orange,
+                                ),
+                              );
+                            },
+                      icon: const Icon(Icons.shopping_cart),
+                      label: Text(
+                          product.stock == 0 ? 'Stok Habis' : 'Add to Cart'),
                     ),
                   ),
                 ],

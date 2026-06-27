@@ -21,6 +21,17 @@ class ProductModel extends Equatable {
     required this.isActive,
   });
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'description': description,
+        'price': price,
+        'stock': stock,
+        'category': category,
+        'image_url': imageUrl,
+        'is_active': isActive,
+      };
+
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
         id: json['ID'] as int? ?? json['id'] as int? ?? 0,
         name: json['name'] as String? ?? '',
