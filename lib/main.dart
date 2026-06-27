@@ -7,15 +7,18 @@ import 'package:beer_store_app/features/auth/presentation/providers/auth_provide
 import 'package:beer_store_app/features/products/presentation/providers/product_provider.dart';
 import 'package:beer_store_app/features/cart/presentation/providers/cart_provider.dart';
 import 'package:beer_store_app/core/theme/theme_provider.dart';
-import 'package:beer_store_app/core/services/payment_callback_provider.dart';
+import 'package:beer_store_app/core/services/global_institute_pay_service.dart';
 import 'package:beer_store_app/core/services/fcm_service.dart';
+import 'package:beer_store_app/core/services/notification_provider.dart';
 import 'package:beer_store_app/features/checkout/presentation/providers/checkout_provider.dart';
+import 'package:beer_store_app/features/orders/presentation/providers/order_history_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FcmService.instance.init();
+  await GlobalInstitutePayService().init();
 
   runApp(const MyApp());
 }
@@ -31,12 +34,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => PaymentCallbackProvider()..init()),
         ChangeNotifierProvider(create: (_) => CheckoutProvider()),
+        ChangeNotifierProvider(create: (_) => OrderHistoryProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()..init()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (_, themeProvider, __) => MaterialApp(
-          title:                     'My App',
+          title: 'Beer Store',
           debugShowCheckedModeBanner: false,
           theme:                     AppTheme.light,
           darkTheme:                 AppTheme.dark,
