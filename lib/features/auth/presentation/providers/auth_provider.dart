@@ -27,6 +27,16 @@ class AuthProvider extends ChangeNotifier {
   String? _backendToken;
   String? _errorMessage;
 
+  AuthProvider() {
+    // Firebase menyimpan sesi secara otomatis.
+    // Pulihkan firebaseUser agar ProfilePage bisa tampilkan nama/foto
+    // tanpa user perlu login ulang.
+    _firebaseUser = _auth.currentUser;
+    if (_firebaseUser != null) {
+      _status = AuthStatus.authenticated;
+    }
+  }
+
   String? _tempEmail;
   String? _tempPassword;
 
