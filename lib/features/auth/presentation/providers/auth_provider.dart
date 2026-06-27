@@ -17,7 +17,7 @@ enum AuthStatus {
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId: "497918096590-1nok3qn97fvjj2ga4227rhc0q1vlpctu.apps.googleusercontent.com",
+    serverClientId: "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
     scopes: ['email'],
   );
 
@@ -207,8 +207,14 @@ Future<bool> loginWithEmail({
       return await _verifyTokenToBackend();
 
     } catch (e) {
-      print("GOOGLE LOGIN ERROR: $e");
-      _setError('Gagal login dengan Google');
+      debugPrint("GOOGLE LOGIN ERROR: $e");
+      if (e.toString().contains('ApiException: 10')) {
+        _setError('Konfigurasi Google Sign In belum lengkap (Error 10). Daftarkan SHA-1 di Firebase Console.');
+      } else if (e.toString().contains('network_error')) {
+        _setError('Tidak ada koneksi internet');
+      } else {
+        _setError('Gagal login dengan Google: ${e.toString()}');
+      }
       return false;
     }
   }
