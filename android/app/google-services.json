@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "497918096590-9aier9n4ss1heaedf70vhimidg93o5p2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.beer_store_app",
+            "certificate_hash": "7ebd4798d17626a67deab73eaff9dc350a2589ab"
+          }
+        },
+        {
           "client_id": "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -27,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
+              "client_id": "497918096590-1nok3qn97fvjj2ga4227rhc0q1vlpctu.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -43,6 +51,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "497918096590-ib687p6dof5i82no6in63i6e4fsbn29j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zaqi.app",
+            "certificate_hash": "7ebd4798d17626a67deab73eaff9dc350a2589ab"
+          }
+        },
+        {
           "client_id": "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -56,7 +72,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "497918096590-r77lnudb80487h8pljpnsguo6hvmvb04.apps.googleusercontent.com",
+              "client_id": "497918096590-1nok3qn97fvjj2ga4227rhc0q1vlpctu.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
