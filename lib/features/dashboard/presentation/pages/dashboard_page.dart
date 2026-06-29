@@ -530,14 +530,6 @@ class _PromoBanner extends StatelessWidget {
                           height: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Gratis ongkir untuk semua pesanan',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 11,
-                        ),
-                      ),
                     ],
                   ),
                 ),
