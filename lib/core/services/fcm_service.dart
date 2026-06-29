@@ -1,9 +1,10 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import '../constants/api_constants.dart';
+import 'dio_client.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Background message diterima saat app tidak aktif
   debugPrint('[FCM] Background: ${message.notification?.title}');
 }
 
@@ -16,25 +17,33 @@ class FcmService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
   Future<void> init() async {
-    // Register background handler sebelum apapun
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // Minta izin notifikasi
-    await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    await _messaging.requestPermission(alert: true, badge: true, sound: true);
 
-    // Ambil FCM token (untuk dikirim ke backend agar bisa push notif)
     final token = await _messaging.getToken();
     debugPrint('[FCM] Token: $token');
+    if (token != null) {
+      await sendTokenToBackend(token);
+    }
 
-    // Foreground: tampilkan notifikasi saat app aktif
+    // Re-kirim saat token diperbarui Firebase
+    _messaging.onTokenRefresh.listen(sendTokenToBackend);
+
     FirebaseMessaging.onMessage.listen(_onForegroundMessage);
-
-    // Tap notifikasi saat app di background (dibuka dari notif)
     FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
+  }
+
+  Future<void> sendTokenToBackend(String token) async {
+    try {
+      await DioClient.instance.put(
+        ApiConstants.fcmToken,
+        data: {'fcm_token': token},
+      );
+      debugPrint('[FCM] Token berhasil dikirim ke backend');
+    } catch (e) {
+      debugPrint('[FCM] Gagal kirim token (mungkin belum login): $e');
+    }
   }
 
   void _onForegroundMessage(RemoteMessage message) {
@@ -46,7 +55,6 @@ class FcmService {
 
   void _onMessageOpenedApp(RemoteMessage message) {
     debugPrint('[FCM] Dibuka dari notifikasi: ${message.data}');
-    // Navigasi ke halaman status transaksi jika diperlukan
   }
 
   Future<String?> getToken() => _messaging.getToken();
