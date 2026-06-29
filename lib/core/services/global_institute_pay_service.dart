@@ -133,7 +133,7 @@ class GlobalInstitutePayService {
         'amount': amount.toInt().toString(),
         'description': desc,
         'reference': reference,
-        'callback': callbackUrl,
+        'callback': 'beerstore://payment-result',
       },
     );
 
