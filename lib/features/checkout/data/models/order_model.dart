@@ -21,12 +21,14 @@ class OrderRequest {
   final double totalAmount;
   final String paymentReference;
   final String paymentMethod;
+  final String paymentStatus;
 
   const OrderRequest({
     required this.items,
     required this.totalAmount,
     required this.paymentReference,
     this.paymentMethod = 'dompet_kampus',
+    this.paymentStatus = 'paid',
   });
 
   Map<String, dynamic> toJson() => {
@@ -34,6 +36,7 @@ class OrderRequest {
         'total_amount': totalAmount,
         'payment_reference': paymentReference,
         'payment_method': paymentMethod,
+        'payment_status': paymentStatus,
       };
 }
 

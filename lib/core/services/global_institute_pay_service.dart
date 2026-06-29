@@ -97,10 +97,9 @@ class GlobalInstitutePayService {
 
     _log(_tag, 'callback diterima: $data');
 
-    if (isColdStart) {
-      _pendingCallback = data;
-      _log(_tag, 'disimpan sebagai pending cold-start');
-    }
+    // Selalu simpan agar bisa di-consume di didChangeAppLifecycleState
+    _pendingCallback = data;
+    _log(_tag, 'disimpan sebagai pending (coldStart=$isColdStart)');
 
     _callbackController.add(data);
     _log(_tag, 'event dikirim ke stream');
