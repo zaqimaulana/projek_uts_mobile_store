@@ -15,4 +15,11 @@ class OrderRepositoryImpl implements OrderRepository {
     );
     return OrderResponse.fromJson(response.data as Map<String, dynamic>);
   }
+
+  Future<void> updateOrderStatus(int orderId, String status) async {
+    await _dio.patch(
+      '${ApiConstants.orders}/$orderId/status',
+      data: {'status': status},
+    );
+  }
 }
