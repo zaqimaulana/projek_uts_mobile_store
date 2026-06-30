@@ -39,29 +39,92 @@ class _DashboardPageState extends State<DashboardPage> {
   void _onNotification() {
     final notif = context.read<NotificationProvider>().latest;
     if (notif == null) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 4),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(notif.title,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            if (notif.body.isNotEmpty) Text(notif.body),
-          ],
-        ),
-        action: SnackBarAction(
-          label: 'Lihat',
-          onPressed: () {
-            context.read<NotificationProvider>().clear();
-            setState(() => _selectedIndex = 1);
-            context.read<OrderHistoryProvider>().fetchOrders();
-          },
+    context.read<NotificationProvider>().clear();
+    _showTopBanner(notif);
+  }
+
+  void _showTopBanner(InAppNotification notif) {
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => Positioned(
+        top: MediaQuery.of(context).padding.top + 8,
+        left: 12,
+        right: 12,
+        child: Material(
+          elevation: 6,
+          borderRadius: BorderRadius.circular(14),
+          color: const Color(0xFF1F1F1F),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.notifications_rounded,
+                      size: 18, color: Colors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        notif.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                      if (notif.body.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          notif.body,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: Size.zero,
+                  ),
+                  onPressed: () {
+                    if (entry.mounted) entry.remove();
+                    setState(() => _selectedIndex = 1);
+                    context.read<OrderHistoryProvider>().fetchOrders();
+                  },
+                  child: const Text(
+                    'Lihat',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
-    context.read<NotificationProvider>().clear();
+
+    Overlay.of(context).insert(entry);
+    Future.delayed(const Duration(seconds: 5), () {
+      if (entry.mounted) entry.remove();
+    });
   }
 
   void _toggleFavorite(int id) => setState(
