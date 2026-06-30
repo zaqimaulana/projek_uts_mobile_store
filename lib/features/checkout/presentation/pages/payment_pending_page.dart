@@ -28,6 +28,8 @@ class PaymentPendingPage extends StatefulWidget {
 class _PaymentPendingPageState extends State<PaymentPendingPage> {
   bool _launching = false;
   bool _payLaunched = false;
+  bool _navigated = false;
+  int? _pendingOrderId;
   StreamSubscription<PaymentCallbackData>? _callbackSub;
 
   static const _brandColor = Color(0xFF1A237E);
@@ -47,8 +49,27 @@ class _PaymentPendingPageState extends State<PaymentPendingPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _launchDompetKampus());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _launchDompetKampus();
+      _createPendingOrder();
+    });
     _callbackSub = GlobalInstitutePayService().onCallback.listen(_onCallback);
+  }
+
+  /// Buat order 'pending' langsung saat halaman terbuka agar muncul
+  /// di riwayat pesanan sebagai "Menunggu" sebelum pembayaran dikonfirmasi.
+  Future<void> _createPendingOrder() async {
+    if (!mounted) return;
+    final cart = context.read<CartProvider>();
+    final checkout = context.read<CheckoutProvider>();
+    final ok = await checkout.submitOrder(
+      cart: cart,
+      paymentReference: widget.reference,
+      paymentStatus: 'pending',
+    ).catchError((_) => false);
+    if (ok == true && mounted) {
+      _pendingOrderId = checkout.lastOrder?.id;
+    }
   }
 
   @override
@@ -99,14 +120,24 @@ class _PaymentPendingPageState extends State<PaymentPendingPage> {
   }
 
   void _sudahBayar() {
+    if (_navigated) return;
+    _navigated = true;
+
     final cart = context.read<CartProvider>();
     final checkout = context.read<CheckoutProvider>();
     final products = context.read<ProductProvider>();
 
-    // Submit order di background, cart langsung dikosongkan
-    checkout.submitOrder(cart: cart, paymentReference: widget.reference)
-        .then((_) => products.fetchProducts())
-        .catchError((_) {});
+    if (_pendingOrderId != null) {
+      // Update order 'pending' → 'paid' di database (+ trigger FCM di backend)
+      checkout.updateOrderStatus(_pendingOrderId!, 'paid')
+          .then((_) => products.fetchProducts())
+          .catchError((_) {});
+    } else {
+      // Fallback: pending order gagal dibuat, buat langsung sebagai 'paid'
+      checkout.submitOrder(cart: cart, paymentReference: widget.reference)
+          .then((_) => products.fetchProducts())
+          .catchError((_) {});
+    }
 
     cart.clearCart();
 
