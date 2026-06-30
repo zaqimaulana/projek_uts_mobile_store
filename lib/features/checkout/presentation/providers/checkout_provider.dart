@@ -19,6 +19,7 @@ class CheckoutProvider extends ChangeNotifier {
   Future<bool> submitOrder({
     required CartProvider cart,
     required String paymentReference,
+    String paymentStatus = 'paid',
   }) async {
     _status = CheckoutStatus.submitting;
     _errorMessage = null;
@@ -35,6 +36,7 @@ class CheckoutProvider extends ChangeNotifier {
             .toList(),
         totalAmount: cart.totalPrice,
         paymentReference: paymentReference,
+        paymentStatus: paymentStatus,
       );
 
       _lastOrder = await _repository.createOrder(request);
@@ -45,6 +47,15 @@ class CheckoutProvider extends ChangeNotifier {
       _status = CheckoutStatus.error;
       _errorMessage = e.toString();
       notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateOrderStatus(int orderId, String status) async {
+    try {
+      await _repository.updateOrderStatus(orderId, status);
+      return true;
+    } catch (_) {
       return false;
     }
   }
