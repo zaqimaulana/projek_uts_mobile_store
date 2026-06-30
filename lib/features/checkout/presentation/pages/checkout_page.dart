@@ -181,7 +181,7 @@ class CheckoutPage extends StatelessWidget {
                           color: const Color(0xFF1A237E).withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.school_rounded,
+                        child: const Icon(Icons.account_balance_wallet_rounded,
                             color: Color(0xFF1A237E), size: 22),
                       ),
                       const SizedBox(width: 12),
@@ -189,11 +189,11 @@ class CheckoutPage extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Global Institute Pay',
+                            Text('E-Money Pay',
                                 style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600)),
-                            Text('Bayar via Dompet Kampus Global',
+                            Text('Bayar via Dana Zaqi',
                                 style: TextStyle(
                                     fontSize: 12, color: Colors.grey)),
                           ],
@@ -249,9 +249,9 @@ class CheckoutPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                icon: const Icon(Icons.school_rounded),
+                icon: const Icon(Icons.account_balance_wallet_rounded),
                 label: Text(
-                  'Bayar ${_formatPrice(cart.totalPrice)} via Dompet Kampus',
+                  'Bayar ${_formatPrice(cart.totalPrice)} via Dana Zaqi',
                   style: const TextStyle(
                       fontSize: 15, fontWeight: FontWeight.bold),
                 ),
