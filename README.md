@@ -3,7 +3,7 @@
 ## 👤 Identitas Mahasiswa
 
 - Nama: ZAQIMAULANA
-- NIM: 1123150148
+- NIM: 1123150048
 - Kelas: TI 23 SH SE
 
 ---
