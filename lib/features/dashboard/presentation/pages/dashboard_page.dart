@@ -18,7 +18,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _selectedIndex = 0;
+  final _tabIndex = ValueNotifier<int>(0);
   final Set<int> _favorites = {};
 
   @override
@@ -33,6 +33,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void dispose() {
     context.read<NotificationProvider>().removeListener(_onNotification);
+    _tabIndex.dispose();
     super.dispose();
   }
 
@@ -43,7 +44,14 @@ class _DashboardPageState extends State<DashboardPage> {
     _showTopBanner(notif);
   }
 
+  /// Pindah ke tab pesanan — bisa dipanggil dari mana saja, termasuk OverlayEntry
+  void _goToOrderTab() {
+    _tabIndex.value = 1;
+    context.read<OrderHistoryProvider>().fetchOrders();
+  }
+
   void _showTopBanner(InAppNotification notif) {
+    final overlayState = Overlay.of(context);
     late OverlayEntry entry;
     entry = OverlayEntry(
       builder: (_) => Positioned(
@@ -54,78 +62,85 @@ class _DashboardPageState extends State<DashboardPage> {
           elevation: 6,
           borderRadius: BorderRadius.circular(14),
           color: const Color(0xFF1F1F1F),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              if (entry.mounted) entry.remove();
+              _goToOrderTab();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.notifications_rounded,
+                        size: 18, color: Colors.white),
                   ),
-                  child: const Icon(Icons.notifications_rounded,
-                      size: 18, color: Colors.white),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        notif.title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      if (notif.body.isNotEmpty) ...[
-                        const SizedBox(height: 2),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Text(
-                          notif.body,
+                          notif.title,
                           style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
+                        if (notif.body.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            notif.body,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: Size.zero,
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: Size.zero,
+                    ),
+                    onPressed: () {
+                      if (entry.mounted) entry.remove();
+                      _goToOrderTab();
+                    },
+                    child: const Text(
+                      'Lihat',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  onPressed: () {
-                    if (entry.mounted) entry.remove();
-                    setState(() => _selectedIndex = 1);
-                    context.read<OrderHistoryProvider>().fetchOrders();
-                  },
-                  child: const Text(
-                    'Lihat',
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
 
-    Overlay.of(context).insert(entry);
+    overlayState.insert(entry);
     Future.delayed(const Duration(seconds: 5), () {
       if (entry.mounted) entry.remove();
     });
   }
+
 
   void _toggleFavorite(int id) => setState(
       () => _favorites.contains(id) ? _favorites.remove(id) : _favorites.add(id));
@@ -133,48 +148,53 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          _HomeTab(
-            favorites: _favorites,
-            onToggleFavorite: _toggleFavorite,
-            onOpenCart: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CartPage()),
-            ),
-            cartCount: cart.totalItems,
+    return ValueListenableBuilder<int>(
+      valueListenable: _tabIndex,
+      builder: (context, selectedIndex, _) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: IndexedStack(
+            index: selectedIndex,
+            children: [
+              _HomeTab(
+                favorites: _favorites,
+                onToggleFavorite: _toggleFavorite,
+                onOpenCart: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CartPage()),
+                ),
+                cartCount: cart.totalItems,
+              ),
+              const OrderHistoryPage(),
+              const ProfilePage(),
+            ],
           ),
-          const OrderHistoryPage(),
-          const ProfilePage(),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (i) {
-          setState(() => _selectedIndex = i);
-          if (i == 1) context.read<OrderHistoryProvider>().fetchOrders();
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Beranda',
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: (i) {
+              _tabIndex.value = i;
+              if (i == 1) context.read<OrderHistoryProvider>().fetchOrders();
+            },
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: 'Beranda',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.receipt_long_outlined),
+                selectedIcon: Icon(Icons.receipt_long),
+                label: 'Pesanan',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person),
+                label: 'Profil',
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Pesanan',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
